@@ -1,3 +1,7 @@
+paket-files
+packages
+.ionide
+.paket
 bin
 obj
-.ionide
+.fake

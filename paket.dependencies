@@ -1,0 +1,15 @@
+source https://api.nuget.org/v3/index.json
+
+storage: none
+framework: netcoreapp3.1, netstandard2.1
+nuget Aether
+nuget FSharp.Core
+nuget MonoGame.Framework.DesktopGL
+
+group test
+  source https://api.nuget.org/v3/index.json
+
+  nuget FSharp.Core
+  nuget Microsoft.NET.Test.Sdk
+  nuget Expecto
+  nuget YoloDev.Expecto.TestSdk
