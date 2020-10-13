@@ -6,7 +6,9 @@
   <ItemGroup>
     <Compile Include="Types.fs" />
     <Compile Include="State.fs" />
+    <Compile Include="Effect.fs" />
     <Compile Include="Logic.fs" />
+    <Compile Include="Content.fs" />
     <Compile Include="Driver.fs" />
     <Compile Include="Extras.fs" />
     <Compile Include="Steering.fs" />

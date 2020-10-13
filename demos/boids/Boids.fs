@@ -141,14 +141,15 @@ let render state =
   seq {
     for _, boid in state.Boids |> Map.toSeq do
       yield
-        {
-          Sprite.Zero with
-            Asset = "assets/boid.png"
-            Origin = Vector2.create 256.0f 256.0f
-            Scale = Vector2.create 0.1f 0.1f
-            Position = boid.Position
-            Rotation = Vector2.toAngle boid.Velocity
-        }
+        Sprite
+          {
+            Sprite.Zero with
+              Asset = "assets/boid.png"
+              Origin = Vector2.create 256.0f 256.0f
+              Scale = Vector2.create 0.1f 0.1f
+              Position = boid.Position
+              Rotation = Vector2.toAngle boid.Velocity
+          }
   }
   |> Seq.toList
 
