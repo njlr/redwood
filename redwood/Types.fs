@@ -40,12 +40,44 @@ type Sprite =
           LayerDepth = 0.0f
         }
 
+[<Struct>]
+type TextAlignment =
+  | Left
+  | Center
+  | Right
+
+[<Struct>]
+type Text =
+  {
+    SpriteFontAsset : string
+    Position : Vector2
+    Text : string
+    Color : Color
+    Alignment : TextAlignment
+  }
+  with
+    static member Zero
+      with get () =
+        {
+          Text = ""
+          SpriteFontAsset = ""
+          Position = Vector2.Zero
+          Color = Color.White
+          Alignment = TextAlignment.Left
+        }
+
+[<Struct>]
+type Renderable =
+  | Sprite of sprite : Sprite
+  | Text of text : Text
+
 type CartridgeAction =
   | PlaySound of string
+  | Exit
 
 type Cartridge<'tstate> =
   {
     Initialize : Unit -> 'tstate
     Update : InputState -> 'tstate -> ('tstate * CartridgeAction list)
-    Render : 'tstate -> Sprite list
+    Render : 'tstate -> Renderable list
   }

@@ -10,10 +10,20 @@ module Vector2 =
   let ofPoint (p : Point) =
     create (float32 p.X) (float32 p.Y)
 
+  let lengthSquared (v : Vector2) =
+    v.LengthSquared ()
+
+  let length (v : Vector2) =
+    v.Length ()
+
   let normalize (v : Vector2) =
-    let u = v
-    u.Normalize ()
-    u
+    let ls = lengthSquared v
+
+    if ls = 0.0f
+    then
+      v
+    else
+      v / (sqrt ls)
 
   let truncate (maxLength : float32) (v : Vector2) =
     let ls = v.LengthSquared ()
@@ -23,12 +33,6 @@ module Vector2 =
       (v * maxLength) / sqrt ls
     else
       v
-
-  let lengthSquared (v : Vector2) =
-    v.LengthSquared ()
-
-  let length (v : Vector2) =
-    v.Length ()
 
   let toAngle (v : Vector2) =
     atan2 v.Y v.X

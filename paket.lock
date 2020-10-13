@@ -6,6 +6,7 @@ NUGET
       FSharp.Core (>= 4.3.4)
     FSharp.Core (4.7.2)
     MonoGame.Framework.DesktopGL (3.8.0.1641)
+    SpriteFontPlus (0.8.1.40)
 
 GROUP test
 NUGET

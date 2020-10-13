@@ -5,6 +5,7 @@ framework: netcoreapp3.1, netstandard2.1
 nuget Aether
 nuget FSharp.Core
 nuget MonoGame.Framework.DesktopGL
+nuget SpriteFontPlus
 
 group test
   source https://api.nuget.org/v3/index.json
