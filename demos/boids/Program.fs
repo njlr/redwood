@@ -4,7 +4,7 @@ open Redwood.Demos.Boids
 
 [<EntryPoint>]
 let main argv =
-  use game = new Driver<_> (cart)
+  use game = new RedwoodDriver<_> (cartridge)
 
   game.IsMouseVisible <- true
 

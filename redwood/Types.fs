@@ -11,6 +11,13 @@ type InputState =
     Keyboard : KeyboardState
     Mouse : MouseState
   }
+  with
+    static member Zero
+      with get () =
+        {
+          Keyboard = KeyboardState ()
+          Mouse = MouseState ()
+        }
 
 [<Struct>]
 type Sprite =

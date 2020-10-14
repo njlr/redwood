@@ -35,7 +35,7 @@ let tests =
     test "Logic computation expression should work as expected 3" {
       let actual =
         logic {
-          do! Logic.playSound "bird.wav"
+          do! Cartridge.playSound "bird.wav"
         }
         |> Logic.run ()
 
@@ -47,9 +47,9 @@ let tests =
     test "Logic computation expression should work as expected 4" {
       let actual =
         logic {
-          do! Logic.playSound "a.wav"
-          do! Logic.playSound "b.wav"
-          do! Logic.playSound "c.wav"
+          do! Cartridge.playSound "a.wav"
+          do! Cartridge.playSound "b.wav"
+          do! Cartridge.playSound "c.wav"
         }
         |> Logic.run ()
 
@@ -70,7 +70,7 @@ let tests =
           let sounds = [ "a.wav"; "b.wav"; "c.wav" ]
 
           for sound in sounds do
-            do! Logic.playSound sound
+            do! Cartridge.playSound sound
         }
         |> Logic.run ()
 

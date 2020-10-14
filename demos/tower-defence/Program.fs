@@ -5,7 +5,7 @@ open Redwood.Demos.TowerDefence.Cartridge
 
 [<EntryPoint>]
 let main argv =
-  use game = new Driver<_> (cartridge)
+  use game = new RedwoodDriver<_> (cartridge)
 
   game.IsMouseVisible <- true
 

@@ -6,7 +6,7 @@ open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
 open Redwood.Content
 
-type Driver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) as this =
+type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) as this =
   inherit Game () with
     let graphics = new GraphicsDeviceManager (this)
 

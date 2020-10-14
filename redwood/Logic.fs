@@ -77,9 +77,6 @@ module Logic =
 
   let emit action = emitAll [ action ]
 
-  let playSound (asset : string) : Logic<_, _, Unit, _> =
-    (fun state -> (state, [ PlaySound asset ]), ())
-
   let zoom (lens : Lens<'outer, 'inner>) (x : Logic<'inner, 'inner, 'ret, _>) : Logic<'outer, 'outer, 'ret, _> =
     (fun outerState ->
       let innerState = Optic.get lens outerState
@@ -124,3 +121,11 @@ module Logic =
 
   // let inline run state (x : State<_, _>) =
   //   x state
+
+[<RequireQualifiedAccess>]
+module Cartridge =
+
+  let exit () = Logic.emit (Exit)
+
+  let playSound (asset : string) = Logic.emit (PlaySound asset)
+

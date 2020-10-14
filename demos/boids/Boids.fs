@@ -5,6 +5,7 @@ open Aether
 open Aether.Operators
 open Redwood
 open Redwood.Logic
+open Redwood.EntitySystem
 open Redwood.Extras
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
@@ -18,133 +19,145 @@ type Boid =
 
 type State =
   {
-    WasPressed : bool
-    Boids : Map<Guid, Boid>
+    PreviousInput : InputState
+    Entities : EntitySystem<Boid>
   }
 
-module State =
+module Boid =
 
-  let boids : Lens<State, _> =
-    (fun x -> x.Boids), (fun v x -> { x with Boids = v })
+  let private findNeighbours (radius : float32) (context : EntityContext<_, _>) =
+    logic {
+      let! state = Logic.getState
 
-let spawnBoid (position : Vector2) =
-  logic {
-    let id = Guid.NewGuid ()
+      return
+        context.World
+        |> Map.toSeq
+        |> Seq.filter (fun (k, v) ->
+          k <> context.Self &&
+          Vector2.lengthSquared (v.Position - state.Position) <= radius * radius
+        )
+        |> Seq.toList
+    }
 
-    let! state = Logic.getState
+  let update (input : InputState) (context : EntityContext<_, _>) =
+    logic {
+      let! state = Logic.getState
 
-    do!
-      Logic.setState
-        {
-          state with
-            Boids =
-              state.Boids
-              |> Map.add
-                id
-                {
-                  Position = position
-                  Velocity = Vector2.Zero + Vector2.create 0.1f 0.1f
-                }
-        }
+      let separationRange = 128.0f
 
-    return id
-  }
+      let! neighbours = findNeighbours separationRange context
 
-let findNeighbours (position : Vector2) (radius : float32) (world : Map<Guid, Boid>) =
-  world
-  |> Map.toSeq
-  |> Seq.filter (fun (k, v) ->
-    Vector2.lengthSquared (v.Position - position) <= radius * radius
-  )
+      let separation =
+        if List.isEmpty neighbours
+        then
+          Vector2.Zero
+        else
+          let sum =
+            neighbours
+            |> Seq.sumBy
+              (fun (_, other) ->
+                let dv = other.Position - state.Position
+                let amount = Vector2.length dv / separationRange
+                Vector2.SmoothStep (dv, Vector2.Zero, amount)
+              )
 
-let updateBoid (input : InputState) (self : Guid) (world : Map<Guid, Boid>) =
-  logic {
-    let! state = Logic.getState
+          sum / float32 (List.length neighbours)
 
-    let separationRange = 128.0f
+      let seek =
+        if input.Mouse.RightButton = ButtonState.Pressed
+        then
+          Steering.flee
+            state.Position
+            (Vector2.ofPoint input.Mouse.Position)
+        else
+          Steering.seek
+            state.Position
+            (Vector2.ofPoint input.Mouse.Position)
 
-    let neighbours =
-      findNeighbours state.Position separationRange world
-      |> Seq.filter (fun (id, _) -> id <> self)
-      |> Seq.toList
+      let steering = seek * 0.2f + separation * 0.8f
 
-    let separation =
-      if List.isEmpty neighbours
-      then
-        Vector2.Zero
-      else
-        let sum =
-          neighbours
-          |> Seq.sumBy
-            (fun (_, other) ->
-              let dv = other.Position - state.Position
-              let amount = Vector2.length dv / separationRange
-              Vector2.SmoothStep (dv, Vector2.Zero, amount)
-            )
+      let nextVelocity =
+        state.Velocity * 0.98f +
+        (Steering.steer state.Velocity steering 0.4f)
 
-        sum / float32 (List.length neighbours)
+      do!
+        Logic.mapState
+          (fun (state : Boid) ->
+            {
+              state with
+                Velocity = nextVelocity
+                Position = state.Position + nextVelocity
+            })
+    }
 
-    let seek =
-      Steering.seek
-        state.Position
-        (Vector2.ofPoint input.Mouse.Position)
+module Optics =
 
-    let steering = seek * 0.3f + separation * 0.7f
+  let previousInput : Lens<State, _> =
+    (fun x -> x.PreviousInput), (fun v x -> { x with PreviousInput = v })
 
-    let nextVelocity =
-      state.Velocity * 0.95f +
-      (Steering.steer state.Velocity steering 0.4f)
-
-    do!
-      Logic.mapState
-        (fun (state : Boid) ->
-          {
-            state with
-              Velocity = nextVelocity
-              Position = state.Position + nextVelocity
-          })
-  }
+  let entities : Lens<State, _> =
+    (fun x -> x.Entities), (fun v x -> { x with Entities = v })
 
 let initialize () =
   {
-    WasPressed = false
-    Boids = Map.empty
+    PreviousInput = InputState.Zero
+    Entities = EntitySystem.empty
   }
 
 let update (input : InputState) state =
   logic {
+    // Press escape to exit
+    if input.Keyboard.IsKeyDown Keys.Escape
+    then
+      do! Cartridge.exit ()
+
     let! state = Logic.getState
 
     let isPressed = input.Mouse.LeftButton = ButtonState.Pressed
+    let wasPressed = state.PreviousInput.Mouse.LeftButton = ButtonState.Pressed
 
-    if isPressed && (not state.WasPressed)
-    then
-      do!
-        spawnBoid (Vector2.ofPoint input.Mouse.Position)
-        |> Logic.ignore
+    // Nested logic for entity system
+    do!
+      logic {
+        // Click to create new boid
+        if isPressed && (not wasPressed)
+        then
+          do!
+            EntitySystem.spawnEntity
+              {
+                Position = Vector2.ofPoint input.Mouse.Position
+                Velocity = Vector2.create 8.0f 4.0f
+              }
+            |> Logic.ignore
 
-    let! state = Logic.getState
+        // Update boids
+        do! EntitySystem.updateEntities (Boid.update input)
+      }
+      |> Logic.zoom Optics.entities
 
-    for id, boid in state.Boids |> Map.toSeq do
-      let optic =
-        State.boids
-        >-> Map.value_ id
-        >-> Option.valueOrDefault boid
-
-      do! Logic.zoom optic (updateBoid input id state.Boids)
-
-    do! Logic.mapState (fun state -> { state with WasPressed = isPressed })
+    // Record the previous input
+    do! Logic.mapState (input ^= Optics.previousInput)
   }
   |> Logic.run state
 
 let render state =
   seq {
-    for _, boid in state.Boids |> Map.toSeq do
+    yield
+      Text
+        {
+          Text.Zero with
+            SpriteFontAsset = "assets/fonts/OpenSans-Regular.ttf"
+            Position = Vector2.create 4.0f 4.0f
+            Alignment = TextAlignment.Left
+            Text = "Left click to create a boid; Right click to scare boids"
+        }
+
+    for _, boid in state.Entities |> Map.toSeq do
       yield
         Sprite
           {
             Sprite.Zero with
-              Asset = "assets/boid.png"
+              Asset = "assets/sprites/boid.png"
               Origin = Vector2.create 256.0f 256.0f
               Scale = Vector2.create 0.1f 0.1f
               Position = boid.Position
@@ -153,7 +166,7 @@ let render state =
   }
   |> Seq.toList
 
-let cart : Cartridge<_> =
+let cartridge : Cartridge<_> =
   {
     Initialize = initialize
     Update = update
