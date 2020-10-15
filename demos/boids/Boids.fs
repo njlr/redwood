@@ -63,16 +63,16 @@ module Boid =
 
           sum / float32 (List.length neighbours)
 
+      let mousePosition = 
+        Vector2.ofXnaPoint input.Mouse.Position 
+        |> Vector2.float32
+
       let seek =
         if input.Mouse.RightButton = ButtonState.Pressed
         then
-          Steering.flee
-            state.Position
-            (Vector2.ofXnaPoint input.Mouse.Position |> Vector2.float32)
+          Steering.flee state.Position mousePosition
         else
-          Steering.seek
-            state.Position
-            (Vector2.ofXnaPoint input.Mouse.Position |> Vector2.float32)
+          Steering.seek state.Position mousePosition
 
       let steering = seek * 0.2f + separation * 0.8f
 
