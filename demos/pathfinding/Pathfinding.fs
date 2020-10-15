@@ -3,29 +3,9 @@ module Redwood.Demos.Pathfinding
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Redwood
-open Redwood.Extras
 open Redwood.Linear
 open Redwood.Logic
 open Redwood.Pathfinding
-
-// [<Struct>]
-// type Vector2I =
-//   {
-//     X : int
-//     Y : int
-//   }
-//   with
-//     static member (+) (p, q) =
-//       {
-//         X = p.X + q.X
-//         Y = p.Y + q.Y
-//       }
-
-//     static member (-) (p, q) =
-//       {
-//         X = p.X - q.X
-//         Y = p.Y - q.Y
-//       }
 
 type State =
   {
