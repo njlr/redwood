@@ -112,16 +112,6 @@ module Logic =
     let (state, actions), () = logic state
     state, actions
 
-//   let map f : State<_, _> = (fun s -> f s, ())
-
-//   let ignore (x : State<'tstate, _>) : State<'tstate, Unit> =
-//     (fun state ->
-//       let state, _ = x state
-//       state, ())
-
-  // let inline run state (x : State<_, _>) =
-  //   x state
-
 [<RequireQualifiedAccess>]
 module Cartridge =
 
