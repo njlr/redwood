@@ -6,6 +6,7 @@ open Redwood.Tests
 let allTests =
   testList "all-tests" [
     Logic.tests
+    Linear.tests
   ]
 
 [<EntryPoint>]

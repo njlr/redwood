@@ -6,6 +6,7 @@ nuget Aether
 nuget FSharp.Core
 nuget MonoGame.Framework.DesktopGL
 nuget SpriteFontPlus
+nuget FSharpx.Collections
 
 group test
   source https://api.nuget.org/v3/index.json

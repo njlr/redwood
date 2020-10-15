@@ -4,6 +4,7 @@ open System
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
+open Redwood.Linear
 open Redwood.Content
 
 type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) as this =
@@ -61,12 +62,12 @@ type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) 
             spriteBatch.Draw
               (
                 texture,
-                sprite.Position,
+                Vector2.toXnaVector2 sprite.Position,
                 sprite.SourceRectangle |> Option.toNullable,
                 sprite.Color,
                 sprite.Rotation,
-                sprite.Origin,
-                sprite.Scale,
+                Vector2.toXnaVector2 sprite.Origin,
+                Vector2.toXnaVector2 sprite.Scale,
                 sprite.Effects,
                 sprite.LayerDepth
               )
@@ -78,7 +79,7 @@ type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) 
               (
                 spriteFont,
                 text.Text,
-                text.Position,
+                Vector2.toXnaVector2 text.Position,
                 text.Color
               )
           | _ -> ()

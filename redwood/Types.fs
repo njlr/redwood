@@ -4,6 +4,7 @@ open System
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
+open Redwood.Linear
 
 [<Struct>]
 type InputState =
@@ -23,10 +24,10 @@ type InputState =
 type Sprite =
   {
     Asset : string
-    Position : Vector2
-    Origin : Vector2
+    Position : Vector2F32
+    Origin : Vector2F32
     SourceRectangle : Rectangle option
-    Scale : Vector2
+    Scale : Vector2F32
     Rotation : float32
     Color : Color
     Effects : SpriteEffects
@@ -37,10 +38,10 @@ type Sprite =
       with get () =
         {
           Asset = ""
-          Position = Vector2.Zero
-          Origin = Vector2.Zero
+          Position = LanguagePrimitives.GenericZero
+          Origin = LanguagePrimitives.GenericZero
           SourceRectangle = None
-          Scale = Vector2.One
+          Scale = Vector2.create 1.0f 1.0f
           Rotation = 0.0f
           Color = Color.White
           Effects = SpriteEffects.None
@@ -57,7 +58,7 @@ type TextAlignment =
 type Text =
   {
     SpriteFontAsset : string
-    Position : Vector2
+    Position : Vector2F32
     Text : string
     Color : Color
     Alignment : TextAlignment
@@ -68,7 +69,7 @@ type Text =
         {
           Text = ""
           SpriteFontAsset = ""
-          Position = Vector2.Zero
+          Position = LanguagePrimitives.GenericZero
           Color = Color.White
           Alignment = TextAlignment.Left
         }

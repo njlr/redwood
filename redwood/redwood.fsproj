@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Linear.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="State.fs" />
     <Compile Include="Effect.fs" />
@@ -12,6 +13,7 @@
     <Compile Include="Driver.fs" />
     <Compile Include="Extras.fs" />
     <Compile Include="Entities.fs" />
+    <Compile Include="Pathfinding.fs" />
     <Compile Include="Steering.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

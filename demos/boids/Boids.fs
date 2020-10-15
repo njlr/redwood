@@ -3,18 +3,18 @@ module Redwood.Demos.Boids
 open System
 open Aether
 open Aether.Operators
+open Microsoft.Xna.Framework
+open Microsoft.Xna.Framework.Input
 open Redwood
 open Redwood.Logic
 open Redwood.EntitySystem
-open Redwood.Extras
-open Microsoft.Xna.Framework
-open Microsoft.Xna.Framework.Input
+open Redwood.Linear
 
 [<Struct>]
 type Boid =
   {
-    Position : Vector2
-    Velocity : Vector2
+    Position : Vector2F32
+    Velocity : Vector2F32
   }
 
 type State =
@@ -50,7 +50,7 @@ module Boid =
       let separation =
         if List.isEmpty neighbours
         then
-          Vector2.Zero
+          Vector2.zero ()
         else
           let sum =
             neighbours
@@ -58,7 +58,7 @@ module Boid =
               (fun (_, other) ->
                 let dv = other.Position - state.Position
                 let amount = Vector2.length dv / separationRange
-                Vector2.SmoothStep (dv, Vector2.Zero, amount)
+                Vector2.smoothStep dv (Vector2.zero ()) amount
               )
 
           sum / float32 (List.length neighbours)
@@ -68,11 +68,11 @@ module Boid =
         then
           Steering.flee
             state.Position
-            (Vector2.ofPoint input.Mouse.Position)
+            (Vector2.ofXnaPoint input.Mouse.Position |> Vector2.float32)
         else
           Steering.seek
             state.Position
-            (Vector2.ofPoint input.Mouse.Position)
+            (Vector2.ofXnaPoint input.Mouse.Position |> Vector2.float32)
 
       let steering = seek * 0.2f + separation * 0.8f
 
@@ -125,7 +125,7 @@ let update (input : InputState) state =
           do!
             EntitySystem.spawnEntity
               {
-                Position = Vector2.ofPoint input.Mouse.Position
+                Position = Vector2.ofXnaPoint input.Mouse.Position |> Vector2.float32
                 Velocity = Vector2.create 8.0f 4.0f
               }
             |> Logic.ignore

@@ -1,15 +1,13 @@
 module Redwood.Steering
 
-open Microsoft.Xna.Framework
-open Redwood.Extras
+open Redwood.Linear
 
-let seek (position : Vector2) (target : Vector2) =
+let inline seek (position : Vector2<_>) (target : Vector2<_>) =
   position - target
 
-let flee (position : Vector2) (target : Vector2) =
+let inline flee (position : Vector2<_>) (target : Vector2<_>) =
   target - position
 
-let steer (velocity : Vector2) (desiredVelocity : Vector2) (maxForce : float32) =
+let inline steer (velocity : Vector2<_>) (desiredVelocity : Vector2<_>) (maxForce : _) =
   velocity - desiredVelocity
   |> Vector2.truncate maxForce
-
