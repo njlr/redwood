@@ -16,6 +16,8 @@ type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) 
 
     let mutable state = Unchecked.defaultof<'tstate>
 
+    let mutable pixel = Unchecked.defaultof<Texture2D>
+
     member this.Graphics with get () = graphics
 
     override this.Initialize () =
@@ -25,6 +27,9 @@ type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) 
     override this.LoadContent () =
       contentManager <- new ContentManager (graphics.GraphicsDevice)
       spriteBatch <- new SpriteBatch (graphics.GraphicsDevice)
+
+      pixel <- new Texture2D(graphics.GraphicsDevice, 1, 1)
+      pixel.SetData ([| Color.White |])
 
     override this.UnloadContent () =
       (contentManager :> IDisposable).Dispose ()
@@ -42,6 +47,7 @@ type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) 
       for action in actions do
         match action with
         | Exit -> this.Exit ()
+        | SetWindowTitle t -> this.Window.Title <- t
         | _ ->
           printfn "Action: %A" action
 
@@ -50,7 +56,14 @@ type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) 
     override this.Draw (gameTime) =
       graphics.GraphicsDevice.Clear Color.CornflowerBlue
 
-      spriteBatch.Begin ()
+      spriteBatch.Begin
+        (
+          SpriteSortMode.BackToFront,
+          // SpriteSortMode.FrontToBack,
+          BlendState.AlphaBlend,
+          SamplerState.AnisotropicClamp,
+          DepthStencilState.Default
+        )
 
       let renderables = cart.Render state
 
@@ -80,8 +93,27 @@ type RedwoodDriver<'tstate when 'tstate : equality> (cart : Cartridge<'tstate>) 
                 spriteFont,
                 text.Text,
                 Vector2.toXnaVector2 text.Position,
-                text.Color
+                text.Color,
+                0.0f,
+                Vector2.Zero,
+                Vector2.One,
+                SpriteEffects.None,
+                text.LayerDepth
               )
           | _ -> ()
+        | Primitive primitive ->
+          let rect = primitive.Shape
+          spriteBatch.Draw
+            (
+              pixel,
+              Vector2.toXnaVector2 rect.Position,
+              Unchecked.defaultof<_>,
+              primitive.Color,
+              0.0f,
+              Vector2.Zero,
+              Vector2 (rect.Area.X, rect.Area.Y),
+              SpriteEffects.None,
+              primitive.LayerDepth
+            )
 
       spriteBatch.End ()

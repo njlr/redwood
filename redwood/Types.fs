@@ -21,12 +21,27 @@ type InputState =
         }
 
 [<Struct>]
+type Rectangle =
+  {
+    Position : Vector2F32
+    Area : Vector2F32
+  }
+
+[<Struct>]
+type Primitive =
+  {
+    Shape : Rectangle
+    Color : Color
+    LayerDepth : float32
+  }
+
+[<Struct>]
 type Sprite =
   {
     Asset : string
     Position : Vector2F32
     Origin : Vector2F32
-    SourceRectangle : Rectangle option
+    SourceRectangle : Microsoft.Xna.Framework.Rectangle option
     Scale : Vector2F32
     Rotation : float32
     Color : Color
@@ -62,6 +77,7 @@ type Text =
     Text : string
     Color : Color
     Alignment : TextAlignment
+    LayerDepth : float32
   }
   with
     static member Zero
@@ -72,15 +88,18 @@ type Text =
           Position = LanguagePrimitives.GenericZero
           Color = Color.White
           Alignment = TextAlignment.Left
+          LayerDepth = 0.0f
         }
 
 [<Struct>]
 type Renderable =
   | Sprite of sprite : Sprite
   | Text of text : Text
+  | Primitive of primitive : Primitive
 
 type CartridgeAction =
   | PlaySound of string
+  | SetWindowTitle of string
   | Exit
 
 type Cartridge<'tstate> =

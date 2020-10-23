@@ -29,15 +29,6 @@ module Entity =
   let tryFindEntity id (world : EntitySystem<_>) =
     Map.tryFind id world
 
-  let spawnEntity initialState =
-    logic {
-      let id = Guid.NewGuid () |> EntityID
-
-      do! Logic.emit (SpawnEntity (id, initialState))
-
-      return id
-    }
-
   let destroyEntity (id : EntityID) =
     Logic.emit (DestroyEntity id)
 
@@ -46,36 +37,59 @@ module EntitySystem =
 
   let empty : Map<EntityID, _> = Map.empty
 
-  let spawnEntity initialState =
-    logic {
-      let id = Guid.NewGuid () |> EntityID
+  let createEntity initialState (entitySystem : EntitySystem<_>) : EntityID * EntitySystem<_> =
+    let id = Guid.NewGuid () |> EntityID
+    id, Map.add id initialState entitySystem
 
-      do! Logic.mapState (Map.add id initialState)
+module Logic =
 
-      return id
-    }
+  [<RequireQualifiedAccess>]
+  module Entity =
 
-  let updateEntities (updateFn : EntityUpdate<'tstate, 'teffect>) : Logic<EntitySystem<'tstate>, EntitySystem<'tstate>, Unit, 'teffect> =
-    logic {
-      let! state = Logic.getState
+    let spawnEntity initialState =
+      logic {
+        let id = Guid.NewGuid () |> EntityID
 
-      for entityID, entity in state |> Map.toSeq do
-        let context =
-          {
-            Self = entityID
-            World = state
-          }
+        do! Logic.emit (SpawnEntity (id, initialState))
 
-        let (nextEntity, effects), () = updateFn context entity
+        return id
+      }
 
-        do! Logic.mapState (Map.add entityID nextEntity)
+  [<RequireQualifiedAccess>]
+  module EntitySystem =
 
-        for effect in effects do
-          match effect with
-          | SpawnEntity (id, initialState) ->
-            do! Logic.mapState (Map.add id initialState)
-          | DestroyEntity entityID ->
-            do! Logic.mapState (Map.remove entityID)
-          | Effect effect ->
-            do! Logic.emit effect
-    }
+    let spawnEntity initialState =
+      logic {
+        let! state = Logic.getState
+
+        let id, state = EntitySystem.createEntity initialState state
+
+        do! Logic.setState state
+
+        return id
+      }
+
+    let updateEntities (updateFn : EntityUpdate<'tstate, 'teffect>) : Logic<EntitySystem<'tstate>, EntitySystem<'tstate>, Unit, 'teffect> =
+      logic {
+        let! state = Logic.getState
+
+        for entityID, entity in state |> Map.toSeq do
+          let context =
+            {
+              Self = entityID
+              World = state
+            }
+
+          let (nextEntity, effects), () = updateFn context entity
+
+          do! Logic.mapState (Map.add entityID nextEntity)
+
+          for effect in effects do
+            match effect with
+            | SpawnEntity (id, initialState) ->
+              do! Logic.mapState (Map.add id initialState)
+            | DestroyEntity entityID ->
+              do! Logic.mapState (Map.remove entityID)
+            | Effect effect ->
+              do! Logic.emit effect
+      }

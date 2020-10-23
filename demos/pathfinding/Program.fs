@@ -1,6 +1,5 @@
 ﻿open System
 open Redwood
-open Redwood.Pathfinding
 open Redwood.Demos.Pathfinding
 
 [<EntryPoint>]

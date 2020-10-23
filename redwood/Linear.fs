@@ -59,6 +59,7 @@ type Vector2I = Vector2<int>
 
 type Vector2F32 = Vector2<float32>
 
+[<RequireQualifiedAccess>]
 module Vector2 =
 
   let inline zero () : Vector2<'a> = LanguagePrimitives.GenericZero
@@ -102,6 +103,17 @@ module Vector2 =
   let inline toAngle (v : Vector2<'a>) : 'a =
     atan2 v.Y v.X
 
+  let inline lerp (u : Vector2<'a>) (v : Vector2<'a>) (t : 'a) : Vector2<'a> =
+    if t < LanguagePrimitives.GenericZero
+    then
+      u
+    else if t > LanguagePrimitives.GenericOne
+    then
+      v
+    else
+      let dv = v - u
+      u + dv * t
+
   let inline smoothStep (u : Vector2<'a>) (v : Vector2<'a>) (t : 'a) : Vector2<'a> =
     let two = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
     let three = two + LanguagePrimitives.GenericOne
@@ -125,6 +137,12 @@ module Vector2 =
       t * t * (three - two * t)
 
     create (smoothStep u.X v.X t) (smoothStep u.Y v.Y t)
+
+  let inline max (u : Vector2<_>) (v : Vector2<_>) =
+    create (max u.X v.X) (max u.Y v.Y)
+
+  let inline min (u : Vector2<_>) (v : Vector2<_>) =
+    create (min u.X v.X) (min u.Y v.Y)
 
   let ofXnaVector2 (v : Microsoft.Xna.Framework.Vector2) : Vector2<_> =
     create v.X v.Y

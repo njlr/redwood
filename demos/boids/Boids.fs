@@ -8,6 +8,7 @@ open Microsoft.Xna.Framework.Input
 open Redwood
 open Redwood.Logic
 open Redwood.EntitySystem
+open Redwood.EntitySystem.Logic
 open Redwood.Linear
 
 [<Struct>]
@@ -63,8 +64,8 @@ module Boid =
 
           sum / float32 (List.length neighbours)
 
-      let mousePosition = 
-        Vector2.ofXnaPoint input.Mouse.Position 
+      let mousePosition =
+        Vector2.ofXnaPoint input.Mouse.Position
         |> Vector2.float32
 
       let seek =

@@ -23,7 +23,7 @@ let private zero () : Logic<_, _, _, _> =
   (fun s -> (s, []), ())
 
 // Combine : M<unit> * M<'T> -> M<'T>
-let private combine (x : Logic<'s, 's, 't, 'eff>) (y : Logic<'s, 's, 't, 'eff>) : Logic<'s, 's, 't, 'eff> =
+let private combineUnit (x : Logic<'s, 's, Unit, 'eff>) (y : Logic<'s, 's, 't, 'eff>) : Logic<'s, 's, 't, 'eff> =
   (fun state ->
     let (state, actions), _ = x state
     let (state, nextActions), ret = y state
@@ -48,7 +48,7 @@ type LogicBuilder () =
   member this.Bind (m, f) = bind m f
   member this.Return x = ret x
   member this.ReturnFrom x = retFrom x
-  member this.Combine (x, y) = combine x y
+  member this.Combine (x, y) = combineUnit x y
   member this.Zero () = zero ()
   member this.Delay f = delay f
   member this.For (xs, f) = forDo xs f
@@ -94,7 +94,7 @@ module Logic =
       | None ->
         (outerState, []), ())
 
-  let transformActions handler (m : Logic<_, _, _, 'eff>) : Logic<_, _, _, 'eff2> =
+  let transformActions handler (m : Logic<_, _, 'ret, 'eff>) : Logic<_, _, 'ret, 'eff2> =
     logic {
       let! state = getState
 
@@ -108,9 +108,13 @@ module Logic =
       return ret
     }
 
-  let run (state : 'tstate) (logic : Logic<'tstate, 'tstate, Unit, _>) =
+  let inline run (state : 'tstate) (logic : Logic<'tstate, 'tstate, Unit, _>) =
     let (state, actions), () = logic state
     state, actions
+
+  let inline apply (state : 'tstate) (logic : Logic<'tstate, 'tstate, 'ret, _>) =
+    let (state, actions), ret = logic state
+    (state, actions), ret
 
 [<RequireQualifiedAccess>]
 module Cartridge =

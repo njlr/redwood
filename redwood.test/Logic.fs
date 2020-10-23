@@ -84,4 +84,23 @@ let tests =
 
       Expect.equal actual expected "logic supports loops"
     }
+
+    test "Logic computation expression should work as expected 6" {
+      let actual =
+        logic {
+          let! state = Logic.getState
+
+          match state with
+          | 1 -> do! Logic.setState (state * 3)
+          | _ -> ()
+
+          return true
+        }
+        |> Logic.apply 1
+
+      let expected =
+        (3, []), true
+
+      Expect.equal actual expected "logic supports unit flows combined with return"
+    }
   ]

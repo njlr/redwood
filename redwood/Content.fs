@@ -33,7 +33,7 @@ type ContentManager (graphicsDevice) =
           TtfFontBaker.Bake
             (
               bytes,
-              25.0f,
+              24.0f,
               1024,
               1024,
               [|
